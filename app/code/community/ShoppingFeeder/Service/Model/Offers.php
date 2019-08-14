@@ -290,7 +290,7 @@ class ShoppingFeeder_Service_Model_Offers extends Mage_Core_Model_Abstract
         return $p;
     }
 
-    public function getItems($page = null, $numPerPage = 1000, $lastUpdate = null, $store = null, $priceCurrency = null, $priceCurrencyRate = null)
+    public function getItems($page = null, $numPerPage = 1000, $lastUpdate = null, $store = null, $priceCurrency = null, $priceCurrencyRate = null, $allowVariants = true)
     {
         /* @var Mage_Catalog_Model_Resource_Eav_Mysql4_Product_Collection $collection */
         $collection = Mage::getModel('catalog/product')->getCollection()
@@ -329,7 +329,7 @@ class ShoppingFeeder_Service_Model_Offers extends Mage_Core_Model_Abstract
              */
 
             //if we have a configurable product, capture the variants
-            if ($product->getTypeId() == 'configurable')
+            if ($product->getTypeId() == 'configurable' && $allowVariants)
             {
                 /** @var Mage_Catalog_Model_Product_Type_Configurable $configModel */
                 $configModel = Mage::getModel('catalog/product_type_configurable');

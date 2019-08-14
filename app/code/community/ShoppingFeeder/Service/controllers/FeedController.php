@@ -18,6 +18,7 @@ class ShoppingFeeder_Service_FeedController extends ShoppingFeeder_Service_Contr
         $lastUpdate = $this->getRequest()->getParam('last_update', null);
         $store = $this->getRequest()->getParam('store', null);
         $currency = $this->getRequest()->getParam('currency', null);
+        $allowVariants = boolval($this->getRequest()->getParam('allow_variants', true));
 
         /**
          * For per-store system
@@ -43,7 +44,7 @@ class ShoppingFeeder_Service_FeedController extends ShoppingFeeder_Service_Contr
 
         if (is_null($offerId))
         {
-            $offers = $offersModel->getItems($page, $numPerPage, $lastUpdate, $store, $priceCurrency, $priceCurrencyRate);
+            $offers = $offersModel->getItems($page, $numPerPage, $lastUpdate, $store, $priceCurrency, $priceCurrencyRate, $allowVariants);
         }
         else
         {
