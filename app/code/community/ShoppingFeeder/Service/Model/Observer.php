@@ -22,7 +22,7 @@ class ShoppingFeeder_Service_Model_Observer extends Varien_Object
                 $orderItems = array();
                 foreach ($order->getAllItems() as $item)
                 {
-                    $orderItems[] = '\''.$item->getId().'\'';
+                    $orderItems[] = '\''.$item->getProductId().'\'';
                 }
                 $orderInfo = array(
                     'items' => $orderItems,
