@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
     <name>shoppingfeeder</name>
-    <version>1.3.8</version>
+    <version>1.3.9</version>
     <stability>stable</stability>
     <license>GNU General Public License (GPL)</license>
     <channel>community</channel>
@@ -16,13 +16,11 @@ Use ShoppingFeeder to import your Shopify product catalogue, export it to numero
 Export to Google, Shopping.com, Nextag, kelkoo, PriceCheck, Shopmania, Fruugo and more!&#xD;
 &#xD;
 To set up your ShoppingFeeder account and install this extension seamlessly, create an account at: &lt;a href="http://www.shoppingfeeder.com/register"&gt;http://www.shoppingfeeder.com/register&lt;/a&gt;</description>
-    <notes>This provides a fix for superfluous attribute values that aren't set.&#xD;
-&#xD;
-Also adds ability to only limit import of configurable products to parent product</notes>
+    <notes>Bug fix for product images in different format</notes>
     <authors><author><name>ShoppingFeeder</name><user>shoppingfeeder</user><email>support@shoppingfeeder.com</email></author></authors>
-    <date>2015-07-09</date>
-    <time>13:26:01</time>
-    <contents><target name="mageetc"><dir name="modules"><file name="ShoppingFeeder_Service.xml" hash="90b374109c2d1281ddf527f24fa7d914"/></dir></target><target name="magecommunity"><dir name="ShoppingFeeder"><dir name="Service"><dir name="Block"><dir name="Adminhtml"><file name="Service.php" hash="e94d54bc342dc2941753ad635c0454a3"/></dir><file name="Service.php" hash="48874f0e80ce70686b81eb5380e9f498"/></dir><dir name="Controller"><file name="FrontAuth.php" hash="28ed32e1bf3250362911a26869f0e6d7"/></dir><dir name="Helper"><file name="Data.php" hash="17589bd08352e497806bef9884972300"/></dir><dir name="Model"><file name="Auth.php" hash="2cff17b0750ff70695b32524627b2aaf"/><file name="Observer.php" hash="fe8d86049e9fef786b13cec3b3a902ed"/><file name="Offers.php" hash="f5c385928d346df0645650ee40b22676"/><file name="Orders.php" hash="cc3c9f38ae41c11ab7dda0bcb8dd001f"/></dir><dir name="controllers"><file name="AttributesController.php" hash="e937c492f770bc8381a003a080cf878b"/><file name="FeedController.php" hash="92b70af3a048ece99d262480c51aa862"/><file name="OrdersController.php" hash="e0dcf407e15ca212b43ee0015c918675"/><file name="StoresController.php" hash="a29fa0e97299ce764fd66360cbf6632a"/><file name="TestController.php" hash="5138a844cb7cbc8e792df664057bdf9b"/><file name="VersionController.php" hash="24ed18b7e8abe667482ade63b8846de9"/></dir><dir name="data"><file name="cacert.pem" hash="380df856e8f789c1af97d0da9a243769"/></dir><dir name="etc"><file name="config.xml" hash="a1639f4f05a981bde3ed1b53532086a7"/><file name="system.xml" hash="9681c74fa8886143197932690616e2dd"/></dir></dir></dir></target></contents>
+    <date>2015-07-21</date>
+    <time>11:22:40</time>
+    <contents><target name="mageetc"><dir name="modules"><file name="ShoppingFeeder_Service.xml" hash="90b374109c2d1281ddf527f24fa7d914"/></dir></target><target name="magecommunity"><dir name="ShoppingFeeder"><dir name="Service"><dir name="Block"><dir name="Adminhtml"><file name="Service.php" hash="e94d54bc342dc2941753ad635c0454a3"/></dir><file name="Service.php" hash="48874f0e80ce70686b81eb5380e9f498"/></dir><dir name="Controller"><file name="FrontAuth.php" hash="28ed32e1bf3250362911a26869f0e6d7"/></dir><dir name="Helper"><file name="Data.php" hash="17589bd08352e497806bef9884972300"/></dir><dir name="Model"><file name="Auth.php" hash="2cff17b0750ff70695b32524627b2aaf"/><file name="Observer.php" hash="fe8d86049e9fef786b13cec3b3a902ed"/><file name="Offers.php" hash="315155c1ada3e17b4f70cdb36a97e9aa"/><file name="Orders.php" hash="cc3c9f38ae41c11ab7dda0bcb8dd001f"/></dir><dir name="controllers"><file name="AttributesController.php" hash="e937c492f770bc8381a003a080cf878b"/><file name="FeedController.php" hash="92b70af3a048ece99d262480c51aa862"/><file name="OrdersController.php" hash="e0dcf407e15ca212b43ee0015c918675"/><file name="StoresController.php" hash="a29fa0e97299ce764fd66360cbf6632a"/><file name="TestController.php" hash="5138a844cb7cbc8e792df664057bdf9b"/><file name="VersionController.php" hash="24ed18b7e8abe667482ade63b8846de9"/></dir><dir name="data"><file name="cacert.pem" hash="380df856e8f789c1af97d0da9a243769"/></dir><dir name="etc"><file name="config.xml" hash="a1639f4f05a981bde3ed1b53532086a7"/><file name="system.xml" hash="9681c74fa8886143197932690616e2dd"/></dir></dir></dir></target></contents>
     <compatible/>
     <dependencies><required><php><min>5.1.0</min><max>6.0.0</max></php></required></dependencies>
 </package>

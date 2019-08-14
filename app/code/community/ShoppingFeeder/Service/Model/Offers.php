@@ -192,15 +192,17 @@ class ShoppingFeeder_Service_Model_Offers extends Mage_Core_Model_Abstract
             if (!is_null($variantImage) && !empty($variantImage) && $variantImage!='no_selection')
             {
                 $imageFile = $variant->getImage();
-                $imageUrl = $p['image_url'] = Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA).
-                    'catalog/product'.$imageFile;
+//                $imageUrl = $p['image_url'] = Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA).
+//                    'catalog/product/'.preg_replace('/^\//', '', $imageFile);
+                $imageUrl = $p['image_url'] = $variant->getMediaConfig()->getMediaUrl($imageFile);
                 $imageLocalPath = $variant->getMediaConfig()->getMediaPath($imageFile);
             }
             else
             {
                 $imageFile = $product->getImage();
-                $imageUrl = $p['image_url'] = Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA).
-                    'catalog/product'.$imageFile;
+//                $imageUrl = $p['image_url'] = Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA).
+//                    'catalog/product/'.preg_replace('/^\//', '', $imageFile);
+                $imageUrl = $p['image_url'] = $product->getMediaConfig()->getMediaUrl($imageFile);
                 $imageLocalPath = $product->getMediaConfig()->getMediaPath($imageFile);
             }
             $productUrl = $product->getProductUrl().'#'.implode('&', $urlHashParts);
@@ -212,8 +214,9 @@ class ShoppingFeeder_Service_Model_Offers extends Mage_Core_Model_Abstract
             $sku = $data['sku'];
             $price = $product->getPrice();
             $imageFile = $product->getImage();
-            $imageUrl = $p['image_url'] = Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA).
-                'catalog/product'.$imageFile;
+//            $imageUrl = $p['image_url'] = Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA).
+//                'catalog/product/'.preg_replace('/^\//', '', $imageFile);
+            $imageUrl = $p['image_url'] = $product->getMediaConfig()->getMediaUrl($imageFile);
             $imageLocalPath = $product->getMediaConfig()->getMediaPath($imageFile);
             $productUrl = $product->getProductUrl();
         }
