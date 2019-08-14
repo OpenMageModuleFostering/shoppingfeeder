@@ -44,6 +44,7 @@ class ShoppingFeeder_Service_Model_Offers extends Mage_Core_Model_Abstract
         $stockItem = Mage::getModel('cataloginventory/stock_item')->loadByProduct($product);
 
         $attributes = $product->getAttributes();
+
         $manufacturer = '';
         $brand = '';
 
@@ -59,7 +60,15 @@ class ShoppingFeeder_Service_Model_Offers extends Mage_Core_Model_Abstract
         {
             $attributeCode = $attribute->getAttributeCode();
             $attributeLabel = $attribute->getData('frontend_label');
-            $value = $attribute->getFrontend()->getValue($product);
+
+            if ($isVariant)
+            {
+                $value = $attribute->getFrontend()->getValue($variant);
+            }
+            else
+            {
+                $value = $attribute->getFrontend()->getValue($product);
+            }
 
 //                var_dump($attributeCode. ' : '.print_r($value, true));
 //                var_dump($attributeLabel. ' : '.print_r($value, true));
@@ -199,6 +208,7 @@ class ShoppingFeeder_Service_Model_Offers extends Mage_Core_Model_Abstract
 
         if ($isVariant && isset($variant))
         {
+//            var_dump($usefulAttributes);
             $p['internal_variant_id'] = $variant->getId();
 
             $variantOptionsTitle = array();
@@ -375,8 +385,22 @@ class ShoppingFeeder_Service_Model_Offers extends Mage_Core_Model_Abstract
                 /** @var Mage_Catalog_Model_Product_Type_Configurable $configModel */
                 $configModel = Mage::getModel('catalog/product_type_configurable');
 
-                //$children = $configModel->getChildrenIds($product->getId());
-                $children = $configModel->getUsedProducts(null,$product);
+//                $timeStart = microtime(true);
+//                $children = $configModel->getChildrenIds($product->getId());
+//                $children = array_pop($children);
+//                var_dump("Time for GetIDs: ".(microtime(true) - $timeStart));
+
+                $timeStart = microtime(true);
+                $children = Mage::getResourceSingleton('catalog/product_type_configurable')
+                    ->getChildrenIds($product->getId());
+//                var_dump("Time for GetIDs 2: ".(microtime(true) - $timeStart));
+                $children = array_pop($children);
+//                var_dump($children);
+
+//                $timeStart = microtime(true);
+//                $children = $configModel->getUsedProducts(null,$product);
+//                var_dump("Time for GetUsed: ".(microtime(true) - $timeStart));
+//                exit();
 
                 if (count($children) > 0)
                 {
@@ -410,10 +434,10 @@ class ShoppingFeeder_Service_Model_Offers extends Mage_Core_Model_Abstract
                     $variantOptions['refactoredOptions'] = $variantAttributes;
 
 
-                    foreach ($children as $variant)
+                    foreach ($children as $variantId)
                     {
                         /** @var Mage_Catalog_Model_Product $variant */
-                        //$variant = Mage::getModel('catalog/product')->load($variantId);
+                        $variant = Mage::getModel('catalog/product')->load($variantId);
 
                         $productData = $this->getProductInfo($variant, $parent, $variantOptions, $lastUpdate, $priceCurrency, $priceCurrencyRate);
                         if (!empty($productData))

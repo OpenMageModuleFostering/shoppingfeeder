@@ -9,7 +9,7 @@
 <config>
     <modules>
         <ShoppingFeeder_Service>
-            <version>1.4.4</version>
+            <version>1.4.5</version>
         </ShoppingFeeder_Service>
     </modules>
     <global>
