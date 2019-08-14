@@ -291,8 +291,13 @@ class ShoppingFeeder_Service_Model_Offers extends Mage_Core_Model_Abstract
             ->addAttributeToFilter('status', Mage_Catalog_Model_Product_Status::STATUS_ENABLED)
             ->addAttributeToFilter('visibility', Mage_Catalog_Model_Product_Visibility::VISIBILITY_BOTH);
 
-        $store='french';
+        /**
+         * For per-store system
+         */
+        /*
+        $store='default';
         $collection->addStoreFilter(Mage::app()->getStore($store)->getId());
+        */
 
         if (!is_null($page))
         {
@@ -308,6 +313,7 @@ class ShoppingFeeder_Service_Model_Offers extends Mage_Core_Model_Abstract
         foreach ($productIds as $productId)
         {
             Mage::getModel('catalog/product')->reset();
+            /** @var Mage_Catalog_Model_Product $product */
             $product = Mage::getModel('catalog/product')->load($productId);
 
             /**
