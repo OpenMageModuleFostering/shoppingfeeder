@@ -277,7 +277,22 @@ class ShoppingFeeder_Service_Model_Offers extends Mage_Core_Model_Abstract
             $p['internal_variant_id'] = '';
             $title = $data['name'];
             $sku = $data['sku'];
-            $price = $product->getPrice();
+
+
+            if ($product->getTypeId() == 'bundle')
+            {
+                /**
+                 * @var $priceModel Mage_Bundle_Model_Product_Price
+                 */
+                $priceModel  = $product->getPriceModel();
+
+                list($price, $_maximalPriceTax) = $priceModel->getTotalPrices($product, null, null, false);
+                list($priceInclTax, $_maximalPriceInclTax) = $priceModel->getTotalPrices($product, null, true, false);
+            }
+            else
+            {
+                $price = $product->getPrice();
+            }
             $imageFile = $product->getImage();
 //            $imageUrl = $p['image_url'] = Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA).
 //                'catalog/product/'.preg_replace('/^\//', '', $imageFile);
