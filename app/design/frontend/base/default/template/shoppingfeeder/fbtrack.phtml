@@ -32,10 +32,11 @@
     });
     <?php endif;?>
     <?php if ($this->getData('order') !== null):?>
+    <?php $order = $this->getData('order');?>
     fbq('track', '<?php echo addslashes($this->getData('action_type'));?>', {
-        content_ids: [<?php echo implode(',', $this->getData('order')['items']);?>],
+        content_ids: [<?php echo implode(',', $order['items']);?>],
         content_type: 'product',
-        value: <?php echo $this->getData('order')['value'];?>,
+        value: <?php echo $order['value'];?>,
         currency: '<?php echo $this->getCurrency();?>'
     });
     <?php endif;?>
