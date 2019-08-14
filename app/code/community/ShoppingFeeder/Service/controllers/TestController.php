@@ -47,6 +47,27 @@ class ShoppingFeeder_Service_TestController extends Mage_Core_Controller_Front_A
 
         try
         {
+
+            //try fetch the store
+            if (!is_null($store))
+            {
+                /** @var $websiteCollection Mage_Core_Model_Store */
+                $storeCollection = Mage::getModel('core/store')->getCollection();
+
+                $stores = array();
+                foreach ($storeCollection as $internalStore) {
+                    /** @var $internalStore Mage_Core_Model_Store */
+                    $internalStore->initConfigCache();
+
+                    $stores[$internalStore->getCode()] = $internalStore->getName();
+                }
+
+                if (!isset($stores[$store]))
+                {
+                    throw new Exception('Multi-store store code is not valid');
+                }
+            }
+
             /** @var ShoppingFeeder_Service_Model_Auth $authModel */
             $authModel = Mage::getModel('shoppingfeeder_service/auth');
             //check if this setup requires SSL
