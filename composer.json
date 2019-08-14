@@ -1,0 +1,16 @@
+{
+    "name": "OpenMageModuleFostering/shoppingfeeder",
+    "type": "magento-module",
+    "license": "GNU-General-Public-License-(GPL)",
+    "homepage": "",
+    "description": "ShoppingFeeder allows you to manage product feeds for any kind of channel, and track everything.",
+    "authors": [
+    {
+        "name": "ShoppingFeeder",
+        "email": "support@shoppingfeeder.com"
+    }
+],
+    "suggest": {
+        "magento-hackathon/magento-composer-installer": "*"
+    }
+}
