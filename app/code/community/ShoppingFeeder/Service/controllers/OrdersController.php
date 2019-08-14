@@ -26,8 +26,13 @@ class ShoppingFeeder_Service_OrdersController extends ShoppingFeeder_Service_Con
         }
         else
         {
-            $mageApp = Mage::app();
-            $mageApp->setCurrentStore($mageApp::DISTRO_STORE_CODE);
+            $defaultStoreCode = Mage::app()
+                ->getWebsite(true)
+                ->getDefaultGroup()
+                ->getDefaultStore()
+                ->getCode();
+
+            Mage::app()->setCurrentStore($defaultStoreCode);
         }
 
         if (is_null($orderId))

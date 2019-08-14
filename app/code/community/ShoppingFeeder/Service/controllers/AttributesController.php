@@ -20,8 +20,13 @@ class ShoppingFeeder_Service_AttributesController extends ShoppingFeeder_Service
         }
         else
         {
-            $mageApp = Mage::app();
-            $mageApp->setCurrentStore($mageApp::DISTRO_STORE_CODE);
+            $defaultStoreCode = Mage::app()
+                ->getWebsite(true)
+                ->getDefaultGroup()
+                ->getDefaultStore()
+                ->getCode();
+
+            Mage::app()->setCurrentStore($defaultStoreCode);
         }
 
         $internalAttributes = Mage::getResourceModel('catalog/product_attribute_collection')

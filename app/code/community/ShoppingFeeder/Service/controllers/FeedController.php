@@ -17,6 +17,8 @@ class ShoppingFeeder_Service_FeedController extends ShoppingFeeder_Service_Contr
         $offerId = $this->getRequest()->getParam('offer_id', null);
         $lastUpdate = $this->getRequest()->getParam('last_update', null);
         $store = $this->getRequest()->getParam('store', null);
+        $currency = $this->getRequest()->getParam('currency', null);
+        $allowVariants = (intval($this->getRequest()->getParam('allow_variants', 1)) == 1) ? true : false;
 
         /**
          * For per-store system
@@ -27,17 +29,26 @@ class ShoppingFeeder_Service_FeedController extends ShoppingFeeder_Service_Contr
         }
         else
         {
-            $mageApp = Mage::app();
-            $mageApp->setCurrentStore($mageApp::DISTRO_STORE_CODE);
+            $defaultStoreCode = Mage::app()
+                ->getWebsite(true)
+                ->getDefaultGroup()
+                ->getDefaultStore()
+                ->getCode();
+
+            Mage::app()->setCurrentStore($defaultStoreCode);
         }
+
+        $baseCurrency = Mage::app()->getStore()->getBaseCurrencyCode();
+        $priceCurrency = (is_null($currency)) ? Mage::app()->getStore()->getDefaultCurrencyCode() : $currency;
+        $priceCurrencyRate = Mage::helper('directory')->currencyConvert(1, $baseCurrency, $priceCurrency);
 
         if (is_null($offerId))
         {
-            $offers = $offersModel->getItems($page, $numPerPage, $lastUpdate, $store);
+            $offers = $offersModel->getItems($page, $numPerPage, $lastUpdate, $store, $priceCurrency, $priceCurrencyRate, $allowVariants);
         }
         else
         {
-            $offers = $offersModel->getItem($offerId, $store);
+            $offers = $offersModel->getItem($offerId, $store, $priceCurrency, $priceCurrencyRate);
         }
 
         $responseData = array(
@@ -46,7 +57,10 @@ class ShoppingFeeder_Service_FeedController extends ShoppingFeeder_Service_Contr
                 'page' => $page,
                 'num_per_page' => $numPerPage,
                 'offers' => $offers,
-                'store' => $store
+                'store' => $store,
+                'base_currency' => $baseCurrency,
+                'price_currency' => $priceCurrency,
+                'exchange_Rate' => $priceCurrencyRate
             )
         );
 
