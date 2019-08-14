@@ -36,12 +36,16 @@ class ShoppingFeeder_Service_Model_Offers extends Mage_Core_Model_Abstract
         {
             $variant = $product;
             $product = $parent;
+            /* @var Mage_CatalogInventory_Model_Stock_Item $stockItem */
+            $stockItem = Mage::getModel('cataloginventory/stock_item')->loadByProduct($variant);
+        }
+        else
+        {
+            /* @var Mage_CatalogInventory_Model_Stock_Item $stockItem */
+            $stockItem = Mage::getModel('cataloginventory/stock_item')->loadByProduct($product);
         }
 
         $data = $product->getData();
-
-        /* @var Mage_CatalogInventory_Model_Stock_Item $stockItem */
-        $stockItem = Mage::getModel('cataloginventory/stock_item')->loadByProduct($product);
 
         $attributes = $product->getAttributes();
 
@@ -497,13 +501,84 @@ class ShoppingFeeder_Service_Model_Offers extends Mage_Core_Model_Abstract
         return $products;
     }
 
-    public function getItem($itemId, $store = null, $priceCurrency = null, $priceCurrencyRate = null)
+    public function getItem($itemId, $store = null, $priceCurrency = null, $priceCurrencyRate = null, $allowVariants = true)
     {
+        $lastUpdate = null;
         $products = array();
 
         $product = Mage::getModel('catalog/product')->load($itemId);
 
-        $products[] = $this->getProductInfo($product, null, null, null, $priceCurrency, $priceCurrencyRate);
+        if ($product->getTypeId() == 'configurable' && $allowVariants)
+        {
+            /** @var Mage_Catalog_Model_Product_Type_Configurable $configModel */
+            $configModel = Mage::getModel('catalog/product_type_configurable');
+
+//                $timeStart = microtime(true);
+//                $children = $configModel->getChildrenIds($product->getId());
+//                $children = array_pop($children);
+//                var_dump("Time for GetIDs: ".(microtime(true) - $timeStart));
+
+            $timeStart = microtime(true);
+            $children = Mage::getResourceSingleton('catalog/product_type_configurable')
+                ->getChildrenIds($product->getId());
+//                var_dump("Time for GetIDs 2: ".(microtime(true) - $timeStart));
+            $children = array_pop($children);
+//                var_dump($children);
+
+//                $timeStart = microtime(true);
+//                $children = $configModel->getUsedProducts(null,$product);
+//                var_dump("Time for GetUsed: ".(microtime(true) - $timeStart));
+//                exit();
+
+            if (count($children) > 0)
+            {
+                $parent = $product;
+
+                //get variant options
+                $layout = Mage::getSingleton('core/layout');
+                $block = $layout->createBlock('catalog/product_view_type_configurable');
+                $block->setProduct($parent);
+                $variantOptions = Mage::helper('core')->jsonDecode($block->getJsonConfig());
+
+                $variantAttributes = array();
+                foreach ($variantOptions['attributes'] as $attributeId => $options)
+                {
+                    $code = $options['code'];
+                    foreach ($options['options'] as $option)
+                    {
+                        $value = $option['label'];
+                        $price = @$option['price'];
+                        $valueId = $option['id'];
+                        foreach ($option['products'] as $productId)
+                        {
+                            //$children[] = $productId;
+                            $variantAttributes[$productId][$code]['value'] = $value;
+                            $variantAttributes[$productId][$code]['price'] = $price;
+                            $variantAttributes[$productId][$code]['valueId'] = $valueId;
+                            $variantAttributes[$productId][$code]['attributeId'] = $attributeId;
+                        }
+                    }
+                }
+                $variantOptions['refactoredOptions'] = $variantAttributes;
+
+
+                foreach ($children as $variantId)
+                {
+                    /** @var Mage_Catalog_Model_Product $variant */
+                    $variant = Mage::getModel('catalog/product')->load($variantId);
+
+                    $productData = $this->getProductInfo($variant, $parent, $variantOptions, $lastUpdate, $priceCurrency, $priceCurrencyRate);
+                    if (!empty($productData))
+                    {
+                        $products[] = $productData;
+                    }
+                }
+            }
+        }
+        else
+        {
+            $products[] = $this->getProductInfo($product, null, null, null, $priceCurrency, $priceCurrencyRate);
+        }
 
         return $products;
     }
