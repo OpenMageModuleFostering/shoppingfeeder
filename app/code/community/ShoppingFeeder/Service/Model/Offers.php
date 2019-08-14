@@ -342,7 +342,7 @@ class ShoppingFeeder_Service_Model_Offers extends Mage_Core_Model_Abstract
                 $p['sale_price'] = $salePrice;
                 if ($product->getSpecialFromDate()!=null && $product->getSpecialToDate()!=null)
                 {
-                    $p['sale_price_effective_date'] = date("c", strtotime(date("Y-m-d 23:59:59", strtotime($product->getSpecialFromDate())))).'/'.date("c", strtotime(date("Y-m-d 23:59:59", strtotime($product->getSpecialToDate()))));
+                    $p['sale_price_effective_date'] = date("c", strtotime(date("Y-m-d 00:00:00", strtotime($product->getSpecialFromDate())))).'/'.date("c", strtotime(date("Y-m-d 23:59:59", strtotime($product->getSpecialToDate()))));
                 }
             }
 
