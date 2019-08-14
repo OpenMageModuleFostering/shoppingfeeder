@@ -481,4 +481,14 @@ class ShoppingFeeder_Service_Model_Offers extends Mage_Core_Model_Abstract
 
         return $products;
     }
+
+    public function getStockQuantity($itemId, $store = null)
+    {
+        $product = Mage::getModel('catalog/product')->load($itemId);
+
+        /* @var Mage_CatalogInventory_Model_Stock_Item $stockItem */
+        $stockItem = Mage::getModel('cataloginventory/stock_item')->loadByProduct($product);
+
+        return $stockItem->getQty();
+    }
 }
