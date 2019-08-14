@@ -100,9 +100,15 @@ class ShoppingFeeder_Service_Model_Offers extends Mage_Core_Model_Abstract
                 $usefulAttributes['pattern'] = $value;
             }
             */
-            if (!is_null($product->getData($attributeCode)) && ((string)$attribute->getFrontend()->getValue($product) != ''))
+
+            $attributeValue = $attribute->getFrontend()->getValue($product);
+            //don't deal with arrays
+            if (!is_array($attributeValue))
             {
-                $usefulAttributes[$attributeCode] = $value;
+                if (!is_null($product->getData($attributeCode)) && ((string)$attributeValue != ''))
+                {
+                    $usefulAttributes[$attributeCode] = $value;
+                }
             }
         }
 //            exit();
