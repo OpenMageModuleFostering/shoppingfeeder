@@ -235,7 +235,14 @@ class ShoppingFeeder_Service_Model_Offers extends Mage_Core_Model_Abstract
                     //add these configured attributes to the set of parent's attributes
                     $usefulAttributes[$attributeCode] = $option['value'];
 
-                    $variantPrice += $option['price'];
+                    if (is_null($option['price']))
+                    {
+                        $variantPrice = $variant->getPrice();
+                    }
+                    else
+                    {
+                        $variantPrice += $option['price'];
+                    }
 
                     $urlHashParts[] = $option['attributeId'].'='.$option['valueId'];
                 }
@@ -430,7 +437,7 @@ class ShoppingFeeder_Service_Model_Offers extends Mage_Core_Model_Abstract
                         foreach ($options['options'] as $option)
                         {
                             $value = $option['label'];
-                            $price = $option['price'];
+                            $price = @$option['price'];
                             $valueId = $option['id'];
                             foreach ($option['products'] as $productId)
                             {
