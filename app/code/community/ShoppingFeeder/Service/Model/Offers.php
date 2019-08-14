@@ -13,7 +13,7 @@ class ShoppingFeeder_Service_Model_Offers extends Mage_Core_Model_Abstract
         return !empty($parents);
     }
 
-    private function getProductInfo(Mage_Catalog_Model_Product $product, Mage_Catalog_Model_Product $parent = null, $variantOptions = null, $lastUpdate = null, $priceCurrency, $priceCurrencyRate)
+    private function getProductInfo(Mage_Catalog_Model_Product $product, Mage_Catalog_Model_Product $parent = null, $variantOptions = null, $lastUpdate = null)
     {
         /** @var Mage_Catalog_Model_Product_Type_Configurable $configModel */
         $configModel = Mage::getModel('catalog/product_type_configurable');
@@ -100,10 +100,7 @@ class ShoppingFeeder_Service_Model_Offers extends Mage_Core_Model_Abstract
                 $usefulAttributes['pattern'] = $value;
             }
             */
-            if (!is_null($product->getData($attributeCode)) && ((string)$attribute->getFrontend()->getValue($product) != ''))
-            {
-                $usefulAttributes[$attributeCode] = $value;
-            }
+            $usefulAttributes[$attributeCode] = $value;
         }
 //            exit();
 
@@ -119,76 +116,44 @@ class ShoppingFeeder_Service_Model_Offers extends Mage_Core_Model_Abstract
 
         if (!empty($categories))
         {
-            /** @var Mage_Catalog_Model_Resource_Category_Collection $categoryCollection */
-            $categoryCollection = $product->getCategoryCollection()->addAttributeToSelect('name');
+            //we will get all the category paths and then use the most refined, deepest one
+            foreach ($categories as $rootCategoryId)
+            {
+                $depth = 0;
+                $category_path = '';
 
-            $depth = 0;
-            foreach($categoryCollection as $cat1){
-                $pathIds = explode('/', $cat1->getPath());
-                unset($pathIds[0]);
+                $mageCategoryPath = Mage::getModel('catalog/category')->load($rootCategoryId)->getPath();
+                $allCategoryIds = explode('/', $mageCategoryPath);
+                unset($allCategoryIds[0]);
 
-                $collection = Mage::getModel('catalog/category')->getCollection()
-                    ->setStoreId(Mage::app()->getStore()->getId())
-                    ->addAttributeToSelect('name')
-                    ->addAttributeToSelect('is_active')
-                    ->addFieldToFilter('entity_id', array('in' => $pathIds));
-
-                $pathByName = array();
-                /** @var Mage_Catalog_Model_Category $cat */
-                foreach($collection as $cat){
-                    if ($cat->getName() != $storeRootCategoryName)
+                $categoryPath = '';
+                /**
+                 * @var Mage_Catalog_Model_Category $category
+                 */
+                foreach ($allCategoryIds as $categoryId)
+                {
+                    $depth++;
+                    $category = Mage::getModel('catalog/category')->load($categoryId);
+                    $category_name = $category->getName();
+                    if ($category_name != $storeRootCategoryName)
                     {
-                        $pathByName[] = $cat->getName();
+                        if (!empty($categoryPath))
+                        {
+                            $categoryPath.= ' > ';
+                        }
+                        $categoryPath.= $category_name;
                     }
                 }
 
-                //take the longest (generally more detailed) path
-                $thisDepth = count($pathByName);
-                if ($thisDepth > $depth)
+                $categoryPathsToEvaluate[$rootCategoryId]['path'] = $categoryPath;
+                $categoryPathsToEvaluate[$rootCategoryId]['depth'] = $depth;
+
+                if ($maxDepth < $depth)
                 {
-                    $depth = $thisDepth;
-                    $categoryPathToUse = implode(' > ', $pathByName);
+                    $maxDepth = $depth;
+                    $categoryPathToUse = $categoryPath;
                 }
             }
-
-//            //we will get all the category paths and then use the most refined, deepest one
-//            foreach ($categories as $rootCategoryId)
-//            {
-//                $depth = 0;
-//                $category_path = '';
-//
-//                $mageCategoryPath = Mage::getModel('catalog/category')->load($rootCategoryId)->getPath();
-//                $allCategoryIds = explode('/', $mageCategoryPath);
-//                unset($allCategoryIds[0]);
-//
-//                $categoryPath = '';
-//                /**
-//                 * @var Mage_Catalog_Model_Category $category
-//                 */
-//                foreach ($allCategoryIds as $categoryId)
-//                {
-//                    $depth++;
-//                    $category = Mage::getModel('catalog/category')->load($categoryId);
-//                    $category_name = $category->getName();
-//                    if ($category_name != $storeRootCategoryName)
-//                    {
-//                        if (!empty($categoryPath))
-//                        {
-//                            $categoryPath.= ' > ';
-//                        }
-//                        $categoryPath.= $category_name;
-//                    }
-//                }
-//
-//                $categoryPathsToEvaluate[$rootCategoryId]['path'] = $categoryPath;
-//                $categoryPathsToEvaluate[$rootCategoryId]['depth'] = $depth;
-//
-//                if ($maxDepth < $depth)
-//                {
-//                    $maxDepth = $depth;
-//                    $categoryPathToUse = $categoryPath;
-//                }
-//            }
         }
 
         if ($isVariant && isset($variant))
@@ -224,17 +189,15 @@ class ShoppingFeeder_Service_Model_Offers extends Mage_Core_Model_Abstract
             if (!is_null($variantImage) && !empty($variantImage) && $variantImage!='no_selection')
             {
                 $imageFile = $variant->getImage();
-//                $imageUrl = $p['image_url'] = Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA).
-//                    'catalog/product/'.preg_replace('/^\//', '', $imageFile);
-                $imageUrl = $p['image_url'] = $variant->getMediaConfig()->getMediaUrl($imageFile);
+                $imageUrl = $p['image_url'] = Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA).
+                    'catalog/product'.$imageFile;
                 $imageLocalPath = $variant->getMediaConfig()->getMediaPath($imageFile);
             }
             else
             {
                 $imageFile = $product->getImage();
-//                $imageUrl = $p['image_url'] = Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA).
-//                    'catalog/product/'.preg_replace('/^\//', '', $imageFile);
-                $imageUrl = $p['image_url'] = $product->getMediaConfig()->getMediaUrl($imageFile);
+                $imageUrl = $p['image_url'] = Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA).
+                    'catalog/product'.$imageFile;
                 $imageLocalPath = $product->getMediaConfig()->getMediaPath($imageFile);
             }
             $productUrl = $product->getProductUrl().'#'.implode('&', $urlHashParts);
@@ -246,9 +209,8 @@ class ShoppingFeeder_Service_Model_Offers extends Mage_Core_Model_Abstract
             $sku = $data['sku'];
             $price = $product->getPrice();
             $imageFile = $product->getImage();
-//            $imageUrl = $p['image_url'] = Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA).
-//                'catalog/product/'.preg_replace('/^\//', '', $imageFile);
-            $imageUrl = $p['image_url'] = $product->getMediaConfig()->getMediaUrl($imageFile);
+            $imageUrl = $p['image_url'] = Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA).
+                'catalog/product'.$imageFile;
             $imageLocalPath = $product->getMediaConfig()->getMediaPath($imageFile);
             $productUrl = $product->getProductUrl();
         }
@@ -258,7 +220,7 @@ class ShoppingFeeder_Service_Model_Offers extends Mage_Core_Model_Abstract
         if ($wasPreviouslyCaptured)
         {
             $p['internal_id'] = $product->getId();
-            $p['internal_update_time'] = date("c", strtotime($usefulAttributes['updated_at']));
+            $p['internal_update_time'] = $usefulAttributes['updated_at'];
         }
         else
         {
@@ -276,12 +238,8 @@ class ShoppingFeeder_Service_Model_Offers extends Mage_Core_Model_Abstract
 
             //$priceModel = $product->getPriceModel();
 
-            //do a currency conversion. if the currency is in base currency, it will be 1.0
-            $price = $price * $priceCurrencyRate;
-            $salePrice = $product->getSpecialPrice() * $priceCurrencyRate;
-
-            $p['currency'] = $priceCurrency;
             $p['price'] = $price;// Mage::helper('checkout')->convertPrice($priceModel->getPrice($product), false);
+            $salePrice = $product->getSpecialPrice();// Mage::helper('checkout')->convertPrice($priceModel->getFinalPrice(null, $product), false);
             $p['sale_price'] = '';
             $p['sale_price_effective_date'] = '';
             if ($salePrice != $p['price'])
@@ -289,14 +247,14 @@ class ShoppingFeeder_Service_Model_Offers extends Mage_Core_Model_Abstract
                 $p['sale_price'] = $salePrice;
                 if ($product->getSpecialFromDate()!=null && $product->getSpecialToDate()!=null)
                 {
-                    $p['sale_price_effective_date'] = date("c", strtotime(date("Y-m-d 23:59:59", strtotime($product->getSpecialFromDate())))).'/'.date("c", strtotime(date("Y-m-d 23:59:59", strtotime($product->getSpecialToDate()))));
+                    $p['sale_price_effective_date'] = date("c", strtotime($product->getSpecialFromDate())).'/'.date("c", strtotime($product->getSpecialToDate()));
                 }
             }
 
             $p['delivery_cost'] = 0.00;
             $p['tax'] = 0.00;
             $p['url'] = $productUrl;
-            $p['internal_update_time'] = isset($usefulAttributes['updated_at']) ? date("c", strtotime($usefulAttributes['updated_at'])) : '';
+            $p['internal_update_time'] = isset($usefulAttributes['updated_at']) ? $usefulAttributes['updated_at'] : '';
 
             $p['image_url'] = $imageUrl;
             if (file_exists($imageLocalPath))
@@ -325,7 +283,7 @@ class ShoppingFeeder_Service_Model_Offers extends Mage_Core_Model_Abstract
         return $p;
     }
 
-    public function getItems($page = null, $numPerPage = 1000, $lastUpdate = null, $store = null, $priceCurrency = null, $priceCurrencyRate = null, $allowVariants = true)
+    public function getItems($page = null, $numPerPage = 1000, $lastUpdate = null, $store = null)
     {
         /* @var Mage_Catalog_Model_Resource_Eav_Mysql4_Product_Collection $collection */
         $collection = Mage::getModel('catalog/product')->getCollection()
@@ -364,7 +322,7 @@ class ShoppingFeeder_Service_Model_Offers extends Mage_Core_Model_Abstract
              */
 
             //if we have a configurable product, capture the variants
-            if ($product->getTypeId() == 'configurable' && $allowVariants)
+            if ($product->getTypeId() == 'configurable')
             {
                 /** @var Mage_Catalog_Model_Product_Type_Configurable $configModel */
                 $configModel = Mage::getModel('catalog/product_type_configurable');
@@ -409,7 +367,7 @@ class ShoppingFeeder_Service_Model_Offers extends Mage_Core_Model_Abstract
                         /** @var Mage_Catalog_Model_Product $variant */
                         //$variant = Mage::getModel('catalog/product')->load($variantId);
 
-                        $productData = $this->getProductInfo($variant, $parent, $variantOptions, $lastUpdate, $priceCurrency, $priceCurrencyRate);
+                        $productData = $this->getProductInfo($variant, $parent, $variantOptions, $lastUpdate);
                         if (!empty($productData))
                         {
                             $products[] = $productData;
@@ -419,7 +377,7 @@ class ShoppingFeeder_Service_Model_Offers extends Mage_Core_Model_Abstract
             }
             else
             {
-                $productData = $this->getProductInfo($product, null, null, $lastUpdate, $priceCurrency, $priceCurrencyRate);
+                $productData = $this->getProductInfo($product, null, null, $lastUpdate);
                 if (!empty($productData))
                 {
                     $products[] = $productData;
@@ -430,13 +388,13 @@ class ShoppingFeeder_Service_Model_Offers extends Mage_Core_Model_Abstract
         return $products;
     }
 
-    public function getItem($itemId, $store = null, $priceCurrency = null, $priceCurrencyRate = null)
+    public function getItem($itemId, $store = null)
     {
         $products = array();
 
         $product = Mage::getModel('catalog/product')->load($itemId);
 
-        $products[] = $this->getProductInfo($product, null, null, null, $priceCurrency, $priceCurrencyRate);
+        $products[] = $this->getProductInfo($product);
 
         return $products;
     }

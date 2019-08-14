@@ -23,7 +23,7 @@ class ShoppingFeeder_Service_Model_Observer extends Varien_Object
         }
         catch (Exception $e)
         {
-            Mage::log('_notifyShoppingFeeder Order ID: '.$order->getRealOrderId().' FAILED! Message: '.$e->getMessage());
+            Mage::log('_notifyShoppingFeeder Order ID: '.$order->getRealOrderId().' FAILED');
         }
     }
 

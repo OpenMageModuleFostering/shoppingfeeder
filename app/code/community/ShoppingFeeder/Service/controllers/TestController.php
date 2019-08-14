@@ -47,27 +47,6 @@ class ShoppingFeeder_Service_TestController extends Mage_Core_Controller_Front_A
 
         try
         {
-
-            //try fetch the store
-            if (!is_null($store))
-            {
-                /** @var $websiteCollection Mage_Core_Model_Store */
-                $storeCollection = Mage::getModel('core/store')->getCollection();
-
-                $stores = array();
-                foreach ($storeCollection as $internalStore) {
-                    /** @var $internalStore Mage_Core_Model_Store */
-                    $internalStore->initConfigCache();
-
-                    $stores[$internalStore->getCode()] = $internalStore->getName();
-                }
-
-                if (!isset($stores[$store]))
-                {
-                    throw new Exception('Multi-store store code is not valid');
-                }
-            }
-
             /** @var ShoppingFeeder_Service_Model_Auth $authModel */
             $authModel = Mage::getModel('shoppingfeeder_service/auth');
             //check if this setup requires SSL
@@ -260,22 +239,6 @@ class ShoppingFeeder_Service_TestController extends Mage_Core_Controller_Front_A
             {
                 echo 'API Keys could not be fetched: ['.$e->getMessage().']'."<br>\n";
             }
-        }
-
-        try {
-            $currency = $this->getRequest()->getParam('currency', null);
-
-            $baseCurrency = Mage::app()->getStore()->getBaseCurrencyCode();
-            $priceCurrency = (is_null($currency)) ? Mage::app()->getStore()->getDefaultCurrencyCode() : $currency;
-            $priceCurrencyRate = Mage::helper('directory')->currencyConvert(1, $baseCurrency, $priceCurrency);
-
-            echo 'Base currency <span style="color:green;">'.$baseCurrency.'</span>'."<br>\n";
-            echo 'Price currency <span style="color:green;">'.$priceCurrency.'</span>'."<br>\n";
-            echo 'Exchange rate '.$baseCurrency.'/'.$priceCurrency.' <span style="color:green;">'.$priceCurrencyRate.'</span>'."<br>\n";
-        }
-        catch (Exception $e)
-        {
-            echo '<span style="color:red;">could not</span> fetch currencies: ['.$e->getMessage().']'."<br>\n";
         }
 
         $offersModel = false;

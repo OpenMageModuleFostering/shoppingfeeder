@@ -9,25 +9,6 @@ class ShoppingFeeder_Service_Controller_FrontAuth extends Mage_Core_Controller_F
 //DEBUG
 //        return $this;
 
-        /**
-         * For per-store system
-         */
-        $store = $this->getRequest()->getParam('store', null);
-        if (!is_null($store))
-        {
-            Mage::app()->setCurrentStore($store);
-        }
-        else
-        {
-            $defaultStoreCode = Mage::app()
-                ->getWebsite(true)
-                ->getDefaultGroup()
-                ->getDefaultStore()
-                ->getCode();
-
-            Mage::app()->setCurrentStore($defaultStoreCode);
-        }
-
         //check Auth
         if (!function_exists('getallheaders'))
         {
