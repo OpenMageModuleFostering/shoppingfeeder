@@ -18,7 +18,7 @@ class ShoppingFeeder_Service_FeedController extends ShoppingFeeder_Service_Contr
         $lastUpdate = $this->getRequest()->getParam('last_update', null);
         $store = $this->getRequest()->getParam('store', null);
         $currency = $this->getRequest()->getParam('currency', null);
-        $allowVariants = boolval($this->getRequest()->getParam('allow_variants', true));
+        $allowVariants = (intval($this->getRequest()->getParam('allow_variants', 1)) == 1) ? true : false;
 
         /**
          * For per-store system
