@@ -21,7 +21,7 @@
     // Insert Your Custom Audience Pixel ID below.
     fbq('init', '<?php echo $this->getPixelId();?>');
 
-    <?php if ($this->getData('product') !== null):?>
+    <?php if ($this->getData('product') !== null && $this->getData('product')->getId() !== null):?>
     fbq('track', '<?php echo addslashes($this->getData('action_type'));?>', {
         content_name: '<?php echo addslashes($this->getData('product')->name);?>',
         content_category: '<?php echo addslashes($this->getData('category'));?>',

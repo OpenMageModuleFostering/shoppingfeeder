@@ -48,7 +48,8 @@ class ShoppingFeeder_Fbtrack_Model_Observer extends Varien_Object
                     $product = Mage::registry('current_product');
                     if (is_null($product))
                     {
-                        $product = Mage::getModel('core/session')->getProductToShoppingCartShoppingFeederFbtrack();
+                        $productId = Mage::getSingleton('core/session')->getProductToShoppingCartShoppingFeederFbtrack();
+                        $product = Mage::getModel('catalog/product')->load($productId);
                     }
 
                     //if we still don't have a product, don't do anything
@@ -142,7 +143,7 @@ class ShoppingFeeder_Fbtrack_Model_Observer extends Varien_Object
                         {
                             $block->setData('action_type', 'AddToCart');
                             //reset the cart product
-                            Mage::getModel('core/session')->setProductToShoppingCartShoppingFeederFbtrack(null);
+                            Mage::getModel('core/session')->unsProductToShoppingCartShoppingFeederFbtrack();
                         }
                     }
                 }
@@ -156,7 +157,7 @@ class ShoppingFeeder_Fbtrack_Model_Observer extends Varien_Object
                     {
                         $block->setData('order', $orderInfo);
                         $block->setData('action_type', 'Purchase');
-                        Mage::getModel('core/session')->setOrderForJsTrackingShoppingFeederFbtrack(null);
+                        Mage::getModel('core/session')->unsOrderForJsTrackingShoppingFeederFbtrack();
                     }
                 }
             }
@@ -173,15 +174,9 @@ class ShoppingFeeder_Fbtrack_Model_Observer extends Varien_Object
     public function setAddToCartProduct($observer)
     {
         try{
-
-            //add the cart product to the session
-            $product = Mage::getModel('catalog/product')
-                ->load(Mage::app()->getRequest()->getParam('product', 0));
-
-            Mage::getModel('core/session')->setProductToShoppingCartShoppingFeederFbtrack($product);
+            Mage::getModel('core/session')->setProductToShoppingCartShoppingFeederFbtrack(Mage::app()->getRequest()->getParam('product', 0));
         }
-        catch (Exception $e)
-        {
+        catch (Exception $e) {
 
         }
     }

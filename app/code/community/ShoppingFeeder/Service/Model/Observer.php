@@ -29,7 +29,7 @@ class ShoppingFeeder_Service_Model_Observer extends Varien_Object
                     'items' => $orderItems,
                     'value' => $order->getGrandTotal()
                 );
-                Mage::getModel('core/session')->setOrderForJsTracking($orderInfo);
+                Mage::getSingleton('core/session')->setSfdrOrderForJsTracking($orderInfo);
 
                 //only notify ShoppingFeeder if required
                 if ($sfEnabled && $sfTracking)
@@ -79,7 +79,8 @@ class ShoppingFeeder_Service_Model_Observer extends Varien_Object
                     $product = Mage::registry('current_product');
                     if (is_null($product))
                     {
-                        $product = Mage::getModel('core/session')->getProductToShoppingCart();
+                        $productId = Mage::getSingleton('core/session')->getSfdrProductToShoppingCart();
+                        $product = Mage::getModel('catalog/product')->load($productId);
                     }
 
                     //if we still don't have a product, don't do anything
@@ -173,7 +174,7 @@ class ShoppingFeeder_Service_Model_Observer extends Varien_Object
                         {
                             $block->setData('action_type', 'AddToCart');
                             //reset the cart product
-                            Mage::getModel('core/session')->setProductToShoppingCart(null);
+                            Mage::getSingleton('core/session')->unsSfdrProductToShoppingCart();
                         }
                     }
                 }
@@ -181,13 +182,12 @@ class ShoppingFeeder_Service_Model_Observer extends Varien_Object
 
                 elseif ($actionName == 'checkout_onepage_success' || $actionName == 'checkout_multishipping_success')
                 {
-                    Mage::log('After template action: '.$actionName);
-                    $orderInfo = Mage::getModel('core/session')->getOrderForJsTracking();
+                    $orderInfo = Mage::getSingleton('core/session')->getSfdrOrderForJsTracking();
                     if (!is_null($orderInfo) && $block)
                     {
                         $block->setData('order', $orderInfo);
                         $block->setData('action_type', 'Purchase');
-                        Mage::getModel('core/session')->setOrderForJsTracking(null);
+                        Mage::getSingleton('core/session')->unsSfdrOrderForJsTracking();
                     }
                 }
             }
@@ -206,10 +206,10 @@ class ShoppingFeeder_Service_Model_Observer extends Varien_Object
         try{
 
             //add the cart product to the session
-            $product = Mage::getModel('catalog/product')
-                ->load(Mage::app()->getRequest()->getParam('product', 0));
+//            $product = Mage::getModel('catalog/product')
+//                ->load(Mage::app()->getRequest()->getParam('product', 0));
 
-            Mage::getModel('core/session')->setProductToShoppingCart($product);
+            Mage::getSingleton('core/session')->setSfdrProductToShoppingCart(Mage::app()->getRequest()->getParam('product', 0));
         }
         catch (Exception $e)
         {
