@@ -163,23 +163,39 @@ class ShoppingFeeder_Service_Model_Offers extends Mage_Core_Model_Abstract
             $urlHashParts = array();
 
             // Collect options applicable to the configurable product
-            foreach ($variantOptions['refactoredOptions'][$variant->getId()] as $attributeCode => $option) {
-                $variantOptionsTitle[] = $option['value'];
+            if (isset($variantOptions['refactoredOptions'][$variant->getId()]))
+            {
+                foreach ($variantOptions['refactoredOptions'][$variant->getId()] as $attributeCode => $option) {
+                    $variantOptionsTitle[] = $option['value'];
 
-                //add these configured attributes to the set of parent's attributes
-                $usefulAttributes[$attributeCode] = $option['value'];
+                    //add these configured attributes to the set of parent's attributes
+                    $usefulAttributes[$attributeCode] = $option['value'];
 
-                $variantPrice += $option['price'];
+                    $variantPrice += $option['price'];
 
-                $urlHashParts[] = $option['attributeId'].'='.$option['valueId'];
+                    $urlHashParts[] = $option['attributeId'].'='.$option['valueId'];
+                }
             }
 
             $variantOptionsTitle = implode(' / ', $variantOptionsTitle);
             $title = $data['name'] . ' - ' . $variantOptionsTitle;
             $sku = $variant->getData('sku');
             $price = $variantPrice;
-            $imageUrl = $p['image_url'] = Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA).
-                'catalog/product'.$variant->getImage();
+            $variantImage = $variant->getImage();
+            if (!is_null($variantImage) && !empty($variantImage))
+            {
+                $imageFile = $variant->getImage();
+                $imageUrl = $p['image_url'] = Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA).
+                    'catalog/product'.$imageFile;
+                $imageLocalPath = $variant->getMediaConfig()->getMediaPath($imageFile);
+            }
+            else
+            {
+                $imageFile = $product->getImage();
+                $imageUrl = $p['image_url'] = Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA).
+                    'catalog/product'.$imageFile;
+                $imageLocalPath = $product->getMediaConfig()->getMediaPath($imageFile);
+            }
             $productUrl = $product->getProductUrl().'#'.implode('&', $urlHashParts);
 
 //            var_dump($variantOptionsTitle);
@@ -192,8 +208,10 @@ class ShoppingFeeder_Service_Model_Offers extends Mage_Core_Model_Abstract
             $title = $data['name'];
             $sku = $data['sku'];
             $price = $product->getPrice();
+            $imageFile = $product->getImage();
             $imageUrl = $p['image_url'] = Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA).
-                'catalog/product'.$product->getImage();
+                'catalog/product'.$imageFile;
+            $imageLocalPath = $product->getMediaConfig()->getMediaPath($imageFile);
             $productUrl = $product->getProductUrl();
         }
 
@@ -239,7 +257,10 @@ class ShoppingFeeder_Service_Model_Offers extends Mage_Core_Model_Abstract
             $p['internal_update_time'] = isset($usefulAttributes['updated_at']) ? $usefulAttributes['updated_at'] : '';
 
             $p['image_url'] = $imageUrl;
-            $p['image_modified_time'] = date("c", filemtime($product->getMediaConfig()->getMediaPath($product->getImage())));
+            if (file_exists($imageLocalPath))
+            {
+                $p['image_modified_time'] = date("c", filemtime($imageLocalPath));
+            }
             $p['availability'] = ($stockItem->getIsInStock())?'in stock':'out of stock';
             $p['quantity'] = $stockItem->getQty();
             $p['condition'] = '';
@@ -250,7 +271,10 @@ class ShoppingFeeder_Service_Model_Offers extends Mage_Core_Model_Abstract
             {
                 $galleryImage = array();
                 $galleryImage['url'] = $image['url'];
-                $galleryImage['image_modified_time'] = date("c", filemtime($image['path']));
+                if (file_exists($image['path']))
+                {
+                    $galleryImage['image_modified_time'] = date("c", filemtime($image['path']));
+                }
                 $imageGallery[] = $galleryImage;
             }
             $p['extra_images'] = $imageGallery;
@@ -266,6 +290,9 @@ class ShoppingFeeder_Service_Model_Offers extends Mage_Core_Model_Abstract
             ->addAttributeToSelect('*')
             ->addAttributeToFilter('status', Mage_Catalog_Model_Product_Status::STATUS_ENABLED)
             ->addAttributeToFilter('visibility', Mage_Catalog_Model_Product_Visibility::VISIBILITY_BOTH);
+
+        $store='french';
+        $collection->addStoreFilter(Mage::app()->getStore($store)->getId());
 
         if (!is_null($page))
         {
@@ -294,9 +321,10 @@ class ShoppingFeeder_Service_Model_Offers extends Mage_Core_Model_Abstract
                 /** @var Mage_Catalog_Model_Product_Type_Configurable $configModel */
                 $configModel = Mage::getModel('catalog/product_type_configurable');
 
-                $variants = array_pop($configModel->getChildrenIds($product->getId()));
+                //$children = $configModel->getChildrenIds($product->getId());
+                $children = $configModel->getUsedProducts(null,$product);
 
-                if (count($variants) > 0)
+                if (count($children) > 0)
                 {
                     $parent = $product;
 
@@ -317,6 +345,7 @@ class ShoppingFeeder_Service_Model_Offers extends Mage_Core_Model_Abstract
                             $valueId = $option['id'];
                             foreach ($option['products'] as $productId)
                             {
+                                //$children[] = $productId;
                                 $variantAttributes[$productId][$code]['value'] = $value;
                                 $variantAttributes[$productId][$code]['price'] = $price;
                                 $variantAttributes[$productId][$code]['valueId'] = $valueId;
@@ -327,10 +356,10 @@ class ShoppingFeeder_Service_Model_Offers extends Mage_Core_Model_Abstract
                     $variantOptions['refactoredOptions'] = $variantAttributes;
 
 
-                    foreach ($variants as $variantId)
+                    foreach ($children as $variant)
                     {
                         /** @var Mage_Catalog_Model_Product $variant */
-                        $variant = Mage::getModel('catalog/product')->load($variantId);
+                        //$variant = Mage::getModel('catalog/product')->load($variantId);
 
                         $productData = $this->getProductInfo($variant, $parent, $variantOptions, $lastUpdate);
                         if (!empty($productData))

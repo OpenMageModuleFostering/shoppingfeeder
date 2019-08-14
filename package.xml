@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
     <name>shoppingfeeder</name>
-    <version>1.2.0</version>
+    <version>1.2.1</version>
     <stability>stable</stability>
     <license>GNU General Public License (GPL)</license>
     <channel>community</channel>
@@ -27,9 +27,9 @@ Features include:&#xD;
 - Click &amp; referral tracking&#xD;
 - Historical order importing for reporting and ROI analysis</notes>
     <authors><author><name>ShoppingFeeder</name><user>shoppingfeeder</user><email>support@shoppingfeeder.com</email></author></authors>
-    <date>2015-04-13</date>
-    <time>08:25:15</time>
-    <contents><target name="mageetc"><dir name="modules"><file name="ShoppingFeeder_Service.xml" hash="90b374109c2d1281ddf527f24fa7d914"/></dir></target><target name="magecommunity"><dir name="ShoppingFeeder"><dir name="Service"><dir name="Block"><dir name="Adminhtml"><file name="Service.php" hash="e94d54bc342dc2941753ad635c0454a3"/></dir><file name="Service.php" hash="48874f0e80ce70686b81eb5380e9f498"/></dir><dir name="Controller"><file name="FrontAuth.php" hash="2dc20fec996f1c02ad8b9374af432ec0"/></dir><dir name="Helper"><file name="Data.php" hash="17589bd08352e497806bef9884972300"/></dir><dir name="Model"><file name="Auth.php" hash="2cff17b0750ff70695b32524627b2aaf"/><file name="Observer.php" hash="79c5aa286d8bfacbe5b4c759b8b0c5f1"/><file name="Offers.php" hash="45ca08e63a13a46795d8e3025cfa47e7"/><file name="Orders.php" hash="682845c908726831937d648ec966db9f"/></dir><dir name="controllers"><file name="AttributesController.php" hash="163472c6ed07a2d9fea4c933a5b6f446"/><file name="FeedController.php" hash="6d469ec267e6e03c6d3a66821bd24848"/><file name="OrdersController.php" hash="07d47f30b9740c9dbb3cebbc54ca915f"/><file name="TestController.php" hash="77604f9f9660c4bcd8ad166160945c85"/><file name="VersionController.php" hash="af8303ea5297a3499f183ae1787f6d2b"/></dir><dir name="etc"><file name="config.xml" hash="51fe66a6abd05e684e66c8b90241a9dc"/><file name="system.xml" hash="9681c74fa8886143197932690616e2dd"/></dir></dir></dir></target></contents>
+    <date>2015-04-30</date>
+    <time>08:07:48</time>
+    <contents><target name="mageetc"><dir name="modules"><file name="ShoppingFeeder_Service.xml" hash="90b374109c2d1281ddf527f24fa7d914"/></dir></target><target name="magecommunity"><dir name="ShoppingFeeder"><dir name="Service"><dir name="Block"><dir name="Adminhtml"><file name="Service.php" hash="e94d54bc342dc2941753ad635c0454a3"/></dir><file name="Service.php" hash="48874f0e80ce70686b81eb5380e9f498"/></dir><dir name="Controller"><file name="FrontAuth.php" hash="2dc20fec996f1c02ad8b9374af432ec0"/></dir><dir name="Helper"><file name="Data.php" hash="17589bd08352e497806bef9884972300"/></dir><dir name="Model"><file name="Auth.php" hash="2cff17b0750ff70695b32524627b2aaf"/><file name="Observer.php" hash="79c5aa286d8bfacbe5b4c759b8b0c5f1"/><file name="Offers.php" hash="2c60d235650767989b933d202d7604d0"/><file name="Orders.php" hash="682845c908726831937d648ec966db9f"/></dir><dir name="controllers"><file name="AttributesController.php" hash="163472c6ed07a2d9fea4c933a5b6f446"/><file name="FeedController.php" hash="6d469ec267e6e03c6d3a66821bd24848"/><file name="OrdersController.php" hash="07d47f30b9740c9dbb3cebbc54ca915f"/><file name="TestController.php" hash="77604f9f9660c4bcd8ad166160945c85"/><file name="VersionController.php" hash="c12a5643372ec4d8c17d6caf11ebb9a6"/></dir><dir name="etc"><file name="config.xml" hash="de0e54dbd281b21e508c044c238d1162"/><file name="system.xml" hash="9681c74fa8886143197932690616e2dd"/></dir></dir></dir></target></contents>
     <compatible/>
     <dependencies><required><php><min>5.1.0</min><max>6.0.0</max></php></required></dependencies>
 </package>
