@@ -7,6 +7,21 @@ class ShoppingFeeder_Service_TestController extends Mage_Core_Controller_Front_A
 {
     public function indexAction()
     {
+        $store = $this->getRequest()->getParam('store', null);
+
+        /**
+         * For per-store system
+         */
+        if (!is_null($store))
+        {
+            Mage::app()->setCurrentStore($store);
+        }
+        else
+        {
+            $mageApp = Mage::app();
+            $mageApp->setCurrentStore($mageApp::DISTRO_STORE_CODE);
+        }
+
         if (!function_exists('getallheaders'))
         {
             function getallheaders()
@@ -94,6 +109,21 @@ class ShoppingFeeder_Service_TestController extends Mage_Core_Controller_Front_A
 
     public function debugAction()
     {
+        $store = $this->getRequest()->getParam('store', null);
+
+        /**
+         * For per-store system
+         */
+        if (!is_null($store))
+        {
+            Mage::app()->setCurrentStore($store);
+        }
+        else
+        {
+            $mageApp = Mage::app();
+            $mageApp->setCurrentStore($mageApp::DISTRO_STORE_CODE);
+        }
+
         if (function_exists('getallheaders'))
         {
             echo 'Function <b>getallheaders</b> <span style="color:green;">exists</span>'."<br>\n";
