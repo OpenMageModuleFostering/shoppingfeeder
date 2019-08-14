@@ -262,6 +262,22 @@ class ShoppingFeeder_Service_TestController extends Mage_Core_Controller_Front_A
             }
         }
 
+        try {
+            $currency = $this->getRequest()->getParam('currency', null);
+
+            $baseCurrency = Mage::app()->getStore()->getBaseCurrencyCode();
+            $priceCurrency = (is_null($currency)) ? Mage::app()->getStore()->getDefaultCurrencyCode() : $currency;
+            $priceCurrencyRate = Mage::helper('directory')->currencyConvert(1, $baseCurrency, $priceCurrency);
+
+            echo 'Base currency <span style="color:green;">'.$baseCurrency.'</span>'."<br>\n";
+            echo 'Price currency <span style="color:green;">'.$priceCurrency.'</span>'."<br>\n";
+            echo 'Exchange rate '.$baseCurrency.'/'.$priceCurrency.' <span style="color:green;">'.$priceCurrencyRate.'</span>'."<br>\n";
+        }
+        catch (Exception $e)
+        {
+            echo '<span style="color:red;">could not</span> fetch currencies: ['.$e->getMessage().']'."<br>\n";
+        }
+
         $offersModel = false;
         try {
             $offersModel = Mage::getSingleton('shoppingfeeder_service/offers');

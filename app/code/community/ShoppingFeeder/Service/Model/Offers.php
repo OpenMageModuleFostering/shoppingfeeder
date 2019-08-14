@@ -13,7 +13,7 @@ class ShoppingFeeder_Service_Model_Offers extends Mage_Core_Model_Abstract
         return !empty($parents);
     }
 
-    private function getProductInfo(Mage_Catalog_Model_Product $product, Mage_Catalog_Model_Product $parent = null, $variantOptions = null, $lastUpdate = null)
+    private function getProductInfo(Mage_Catalog_Model_Product $product, Mage_Catalog_Model_Product $parent = null, $variantOptions = null, $lastUpdate = null, $priceCurrency, $priceCurrencyRate)
     {
         /** @var Mage_Catalog_Model_Product_Type_Configurable $configModel */
         $configModel = Mage::getModel('catalog/product_type_configurable');
@@ -238,8 +238,12 @@ class ShoppingFeeder_Service_Model_Offers extends Mage_Core_Model_Abstract
 
             //$priceModel = $product->getPriceModel();
 
+            //do a currency conversion. if the currency is in base currency, it will be 1.0
+            $price = $price * $priceCurrencyRate;
+            $salePrice = $product->getSpecialPrice() * $priceCurrencyRate;
+
+            $p['currency'] = $priceCurrency;
             $p['price'] = $price;// Mage::helper('checkout')->convertPrice($priceModel->getPrice($product), false);
-            $salePrice = $product->getSpecialPrice();// Mage::helper('checkout')->convertPrice($priceModel->getFinalPrice(null, $product), false);
             $p['sale_price'] = '';
             $p['sale_price_effective_date'] = '';
             if ($salePrice != $p['price'])
@@ -283,7 +287,7 @@ class ShoppingFeeder_Service_Model_Offers extends Mage_Core_Model_Abstract
         return $p;
     }
 
-    public function getItems($page = null, $numPerPage = 1000, $lastUpdate = null, $store = null)
+    public function getItems($page = null, $numPerPage = 1000, $lastUpdate = null, $store = null, $priceCurrency = null, $priceCurrencyRate = null)
     {
         /* @var Mage_Catalog_Model_Resource_Eav_Mysql4_Product_Collection $collection */
         $collection = Mage::getModel('catalog/product')->getCollection()
@@ -367,7 +371,7 @@ class ShoppingFeeder_Service_Model_Offers extends Mage_Core_Model_Abstract
                         /** @var Mage_Catalog_Model_Product $variant */
                         //$variant = Mage::getModel('catalog/product')->load($variantId);
 
-                        $productData = $this->getProductInfo($variant, $parent, $variantOptions, $lastUpdate);
+                        $productData = $this->getProductInfo($variant, $parent, $variantOptions, $lastUpdate, $priceCurrency, $priceCurrencyRate);
                         if (!empty($productData))
                         {
                             $products[] = $productData;
@@ -377,7 +381,7 @@ class ShoppingFeeder_Service_Model_Offers extends Mage_Core_Model_Abstract
             }
             else
             {
-                $productData = $this->getProductInfo($product, null, null, $lastUpdate);
+                $productData = $this->getProductInfo($product, null, null, $lastUpdate, $priceCurrency, $priceCurrencyRate);
                 if (!empty($productData))
                 {
                     $products[] = $productData;
@@ -388,13 +392,13 @@ class ShoppingFeeder_Service_Model_Offers extends Mage_Core_Model_Abstract
         return $products;
     }
 
-    public function getItem($itemId, $store = null)
+    public function getItem($itemId, $store = null, $priceCurrency = null, $priceCurrencyRate = null)
     {
         $products = array();
 
         $product = Mage::getModel('catalog/product')->load($itemId);
 
-        $products[] = $this->getProductInfo($product);
+        $products[] = $this->getProductInfo($product, null, null, null, $priceCurrency, $priceCurrencyRate);
 
         return $products;
     }
