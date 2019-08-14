@@ -119,8 +119,6 @@ class ShoppingFeeder_Service_Model_Offers extends Mage_Core_Model_Abstract
 
         if (!empty($categories))
         {
-
-
             /** @var Mage_Catalog_Model_Resource_Category_Collection $categoryCollection */
             $categoryCollection = $product->getCategoryCollection()->addAttributeToSelect('name');
 
@@ -291,7 +289,7 @@ class ShoppingFeeder_Service_Model_Offers extends Mage_Core_Model_Abstract
                 $p['sale_price'] = $salePrice;
                 if ($product->getSpecialFromDate()!=null && $product->getSpecialToDate()!=null)
                 {
-                    $p['sale_price_effective_date'] = date("c", strtotime($product->getSpecialFromDate())).'/'.date("c", strtotime($product->getSpecialToDate()));
+                    $p['sale_price_effective_date'] = date("c", strtotime(date("Y-m-d 23:59:59", strtotime($product->getSpecialFromDate())))).'/'.date("c", strtotime(date("Y-m-d 23:59:59", strtotime($product->getSpecialToDate()))));
                 }
             }
 
