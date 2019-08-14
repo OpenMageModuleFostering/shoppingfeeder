@@ -88,6 +88,7 @@
                         </fb_track>
                         <fb_track_code translate="label">
                             <label>Facebook Audience Tracking Pixel Code</label>
+                            <comment><![CDATA[Be sure to get your tracking code ID from Facebook. You can <a href="https://developers.facebook.com/docs/ads-for-websites/website-custom-audiences/getting-started#install-the-pixel" target="_blank">read more here</a>. Don't worry about all the JavaScript, this module sets all that up for you.]]></comment>
                             <frontend_type>text</frontend_type>
                             <source_model>adminhtml/system_config_source_yesno</source_model>
                             <sort_order>5</sort_order>

@@ -1,0 +1,44 @@
+<?php
+/**
+ *
+ * Facebook Dynamic Product Ads tracking code by ShoppingFeeder
+ * Get ShoppingFeeder Feed Management & Channel Marketing Service now: http://www.shoppingfeeder.com
+ *
+ * @category    design
+ * @package     base_default_template_shoppingfeeder_fbtrack
+ * @copyright   Copyright (c) 2015 Kevin Tucker (ShoppingFeeder)
+ *
+ */
+?>
+
+<!-- Custom Audience Pixel Code -->
+<script>
+    !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+        n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+        n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+        t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
+            document,'script','//connect.facebook.net/en_US/fbevents.js');
+    // Insert Your Custom Audience Pixel ID below.
+    fbq('init', '<?php echo $this->getPixelId();?>');
+
+    <?php if ($this->getData('product') !== null):?>
+    fbq('track', '<?php echo addslashes($this->getData('action_type'));?>', {
+        content_name: '<?php echo addslashes($this->getData('product')->name);?>',
+        content_category: '<?php echo addslashes($this->getData('category'));?>',
+        content_ids: ['<?php echo addslashes($this->getData('product')->getId());?>'],
+        content_type: 'product',
+        value: <?php echo $this->getProductPrice();?>,
+        currency: '<?php echo $this->getCurrency();?>'
+    });
+    <?php endif;?>
+    <?php if ($this->getData('order') !== null):?>
+    fbq('track', '<?php echo addslashes($this->getData('action_type'));?>', {
+        content_ids: [<?php echo implode(',', $this->getData('order')['items']);?>],
+        content_type: 'product',
+        value: <?php echo $this->getData('order')['value'];?>,
+        currency: '<?php echo $this->getCurrency();?>'
+    });
+    <?php endif;?>
+
+</script>
+<!-- End Custom Audience Pixel Code -->

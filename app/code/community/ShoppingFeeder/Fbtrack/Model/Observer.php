@@ -1,23 +1,14 @@
 <?php
-class ShoppingFeeder_Service_Model_Observer extends Varien_Object
+class ShoppingFeeder_Fbtrack_Model_Observer extends Varien_Object
 {
-    const SF_URL = 'https://www.shoppingfeeder.com/webhook/magento-orders/';
-    //const SF_URL = 'http://dev.shoppingfeeder.com/webhook/magento-orders/';
-
     public function salesOrderPlaceAfter($observer)
     {
         try{
-            //if order tracking is set
-            //$sfEnabled = Mage::getStoreConfig('shoppingfeeder/service/enable');
-            $sfEnabled = true;
-            $sfTracking = Mage::getStoreConfig('shoppingfeeder/service/tracking');
-            $fbTracking = Mage::getStoreConfig('shoppingfeeder/fb_track_config/fb_track');
-            if (($sfEnabled && $sfTracking) || (!is_null($fbTracking) && $fbTracking))
+            $fbTracking = Mage::getStoreConfig('shoppingfeeder_fbtrack/fb_track_config/fb_track');
+            if (!is_null($fbTracking) && $fbTracking)
             {
                 /* @var Mage_Sales_Model_Order $order */
                 $order = $observer->getEvent()->getOrder();
-
-                //Mage::log('salesOrderPlaceAfter Order ID: '.$order->getRealOrderId());
 
                 //set the order for JS tracking code
                 $orderItems = array();
@@ -29,34 +20,12 @@ class ShoppingFeeder_Service_Model_Observer extends Varien_Object
                     'items' => $orderItems,
                     'value' => $order->getGrandTotal()
                 );
-                Mage::getModel('core/session')->setOrderForJsTracking($orderInfo);
-
-                //only notify ShoppingFeeder if required
-                if ($sfEnabled && $sfTracking)
-                {
-                    $this->_notifyShoppingFeeder($order);
-                }
+                Mage::getModel('core/session')->setOrderForJsTrackingShoppingFeederFbtrack($orderInfo);
             }
         }
         catch (Exception $e)
         {
             Mage::log('_notifyShoppingFeeder Order ID: '.$order->getRealOrderId().' FAILED! Message: '.$e->getMessage());
-        }
-    }
-
-    public function productView($observer)
-    {
-        try{
-            //here we're going to create the referral cookie for the visitor if they came from ShoppingFeeder
-            if (isset($_GET['SFDRREF']))
-            {
-                setcookie('SFDRREF', $_GET['SFDRREF'], time() + (60*60*24*30), '/');
-                $_COOKIE['SFDRREF']= $_GET['SFDRREF'];
-            }
-        }
-        catch (Exception $e)
-        {
-
         }
     }
 
@@ -66,20 +35,20 @@ class ShoppingFeeder_Service_Model_Observer extends Varien_Object
     public function generateBlocksAfter($observer)
     {
         try{
-            $fbTracking = Mage::getStoreConfig('shoppingfeeder/fb_track_config/fb_track');
+            $fbTracking = Mage::getStoreConfig('shoppingfeeder_fbtrack/fb_track_config/fb_track');
             if (!is_null($fbTracking) && $fbTracking)
             {
                 $actionName = $observer->getEvent()->getAction()->getFullActionName();
     //            var_dump($actionName);
     //            exit();
-                $block = Mage::app()->getFrontController()->getAction()->getLayout()->getBlock('shoppingfeeder_service_tracking_fb');
+                $block = Mage::app()->getFrontController()->getAction()->getLayout()->getBlock('shoppingfeeder_fbtrack_tracking_fb');
 
                 if ($actionName == 'catalog_product_view' || $actionName == 'checkout_cart_index')
                 {
                     $product = Mage::registry('current_product');
                     if (is_null($product))
                     {
-                        $product = Mage::getModel('core/session')->getProductToShoppingCart();
+                        $product = Mage::getModel('core/session')->getProductToShoppingCartShoppingFeederFbtrack();
                     }
 
                     //if we still don't have a product, don't do anything
@@ -173,7 +142,7 @@ class ShoppingFeeder_Service_Model_Observer extends Varien_Object
                         {
                             $block->setData('action_type', 'AddToCart');
                             //reset the cart product
-                            Mage::getModel('core/session')->setProductToShoppingCart(null);
+                            Mage::getModel('core/session')->setProductToShoppingCartShoppingFeederFbtrack(null);
                         }
                     }
                 }
@@ -182,12 +151,12 @@ class ShoppingFeeder_Service_Model_Observer extends Varien_Object
                 elseif ($actionName == 'checkout_onepage_success' || $actionName == 'checkout_multishipping_success')
                 {
                     Mage::log('After template action: '.$actionName);
-                    $orderInfo = Mage::getModel('core/session')->getOrderForJsTracking();
+                    $orderInfo = Mage::getModel('core/session')->getOrderForJsTrackingShoppingFeederFbtrack();
                     if (!is_null($orderInfo) && $block)
                     {
                         $block->setData('order', $orderInfo);
                         $block->setData('action_type', 'Purchase');
-                        Mage::getModel('core/session')->setOrderForJsTracking(null);
+                        Mage::getModel('core/session')->setOrderForJsTrackingShoppingFeederFbtrack(null);
                     }
                 }
             }
@@ -209,33 +178,11 @@ class ShoppingFeeder_Service_Model_Observer extends Varien_Object
             $product = Mage::getModel('catalog/product')
                 ->load(Mage::app()->getRequest()->getParam('product', 0));
 
-            Mage::getModel('core/session')->setProductToShoppingCart($product);
+            Mage::getModel('core/session')->setProductToShoppingCartShoppingFeederFbtrack($product);
         }
         catch (Exception $e)
         {
 
         }
-    }
-
-    protected function _notifyShoppingFeeder(Mage_Sales_Model_Order $order)
-    {
-        Mage::log('_notifyShoppingFeeder Order ID: '.$order->getRealOrderId());
-
-        //get API key value from admin settings
-        $apiKey = $sfTracking = Mage::getStoreConfig('shoppingfeeder/service/apikey');
-
-        $http = new Zend_Http_Client(self::SF_URL);
-
-        $http->setHeaders('X-SFApiKey', $apiKey);
-
-        $data = $order->toArray();
-        foreach ($order->getAllItems() as $lineItem)
-        {
-            $data['line_items'][] = $lineItem->toArray();
-        }
-        $data['landing_site_ref'] = isset($_COOKIE['SFDRREF']) ? $_COOKIE['SFDRREF'] : '';
-
-        $http->setRawData(Mage::helper('core')->jsonEncode($data));
-        $http->request(Zend_Http_Client::POST);
     }
 }
