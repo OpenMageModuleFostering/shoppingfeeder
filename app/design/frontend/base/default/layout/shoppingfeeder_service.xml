@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<!--
+ *
+/**
+ *
+ * Facebook Dynamic Product Ads tracking code by ShoppingFeeder
+ * Get ShoppingFeeder Feed Management & Channel Marketing Service now: http://www.shoppingfeeder.com
+ *
+ * @category    design
+ * @package     base_default_layout_shoppingfeeder
+ * @copyright   Copyright (c) 2015 Kevin Tucker (ShoppingFeeder)
+ *
+ */
+
+-->
+<layout version="0.1.0">
+
+<!--
+Default layout, loads most of the pages
+-->
+
+    <default>
+        <!-- ShoppingFeeder_Service -->
+        <reference name="before_body_end">
+            <block type="shoppingfeeder_service/tracking_fb" name="shoppingfeeder_service_tracking_fb" as="shoppingfeeder_service_tracking_fb" template="shoppingfeeder/fbtrack.phtml" />
+        </reference>
+    </default>
+</layout>

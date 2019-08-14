@@ -119,44 +119,76 @@ class ShoppingFeeder_Service_Model_Offers extends Mage_Core_Model_Abstract
 
         if (!empty($categories))
         {
-            //we will get all the category paths and then use the most refined, deepest one
-            foreach ($categories as $rootCategoryId)
-            {
-                $depth = 0;
-                $category_path = '';
+            /** @var Mage_Catalog_Model_Resource_Category_Collection $categoryCollection */
+            $categoryCollection = $product->getCategoryCollection()->addAttributeToSelect('name');
 
-                $mageCategoryPath = Mage::getModel('catalog/category')->load($rootCategoryId)->getPath();
-                $allCategoryIds = explode('/', $mageCategoryPath);
-                unset($allCategoryIds[0]);
+            $depth = 0;
+            foreach($categoryCollection as $cat1){
+                $pathIds = explode('/', $cat1->getPath());
+                unset($pathIds[0]);
 
-                $categoryPath = '';
-                /**
-                 * @var Mage_Catalog_Model_Category $category
-                 */
-                foreach ($allCategoryIds as $categoryId)
-                {
-                    $depth++;
-                    $category = Mage::getModel('catalog/category')->load($categoryId);
-                    $category_name = $category->getName();
-                    if ($category_name != $storeRootCategoryName)
+                $collection = Mage::getModel('catalog/category')->getCollection()
+                    ->setStoreId(Mage::app()->getStore()->getId())
+                    ->addAttributeToSelect('name')
+                    ->addAttributeToSelect('is_active')
+                    ->addFieldToFilter('entity_id', array('in' => $pathIds));
+
+                $pathByName = array();
+                /** @var Mage_Catalog_Model_Category $cat */
+                foreach($collection as $cat){
+                    if ($cat->getName() != $storeRootCategoryName)
                     {
-                        if (!empty($categoryPath))
-                        {
-                            $categoryPath.= ' > ';
-                        }
-                        $categoryPath.= $category_name;
+                        $pathByName[] = $cat->getName();
                     }
                 }
 
-                $categoryPathsToEvaluate[$rootCategoryId]['path'] = $categoryPath;
-                $categoryPathsToEvaluate[$rootCategoryId]['depth'] = $depth;
-
-                if ($maxDepth < $depth)
+                //take the longest (generally more detailed) path
+                $thisDepth = count($pathByName);
+                if ($thisDepth > $depth)
                 {
-                    $maxDepth = $depth;
-                    $categoryPathToUse = $categoryPath;
+                    $depth = $thisDepth;
+                    $categoryPathToUse = implode(' > ', $pathByName);
                 }
             }
+
+//            //we will get all the category paths and then use the most refined, deepest one
+//            foreach ($categories as $rootCategoryId)
+//            {
+//                $depth = 0;
+//                $category_path = '';
+//
+//                $mageCategoryPath = Mage::getModel('catalog/category')->load($rootCategoryId)->getPath();
+//                $allCategoryIds = explode('/', $mageCategoryPath);
+//                unset($allCategoryIds[0]);
+//
+//                $categoryPath = '';
+//                /**
+//                 * @var Mage_Catalog_Model_Category $category
+//                 */
+//                foreach ($allCategoryIds as $categoryId)
+//                {
+//                    $depth++;
+//                    $category = Mage::getModel('catalog/category')->load($categoryId);
+//                    $category_name = $category->getName();
+//                    if ($category_name != $storeRootCategoryName)
+//                    {
+//                        if (!empty($categoryPath))
+//                        {
+//                            $categoryPath.= ' > ';
+//                        }
+//                        $categoryPath.= $category_name;
+//                    }
+//                }
+//
+//                $categoryPathsToEvaluate[$rootCategoryId]['path'] = $categoryPath;
+//                $categoryPathsToEvaluate[$rootCategoryId]['depth'] = $depth;
+//
+//                if ($maxDepth < $depth)
+//                {
+//                    $maxDepth = $depth;
+//                    $categoryPathToUse = $categoryPath;
+//                }
+//            }
         }
 
         if ($isVariant && isset($variant))
@@ -226,7 +258,7 @@ class ShoppingFeeder_Service_Model_Offers extends Mage_Core_Model_Abstract
         if ($wasPreviouslyCaptured)
         {
             $p['internal_id'] = $product->getId();
-            $p['internal_update_time'] = $usefulAttributes['updated_at'];
+            $p['internal_update_time'] = date("c", strtotime($usefulAttributes['updated_at']));
         }
         else
         {
@@ -257,14 +289,14 @@ class ShoppingFeeder_Service_Model_Offers extends Mage_Core_Model_Abstract
                 $p['sale_price'] = $salePrice;
                 if ($product->getSpecialFromDate()!=null && $product->getSpecialToDate()!=null)
                 {
-                    $p['sale_price_effective_date'] = date("c", strtotime($product->getSpecialFromDate())).'/'.date("c", strtotime($product->getSpecialToDate()));
+                    $p['sale_price_effective_date'] = date("c", strtotime(date("Y-m-d 23:59:59", strtotime($product->getSpecialFromDate())))).'/'.date("c", strtotime(date("Y-m-d 23:59:59", strtotime($product->getSpecialToDate()))));
                 }
             }
 
             $p['delivery_cost'] = 0.00;
             $p['tax'] = 0.00;
             $p['url'] = $productUrl;
-            $p['internal_update_time'] = isset($usefulAttributes['updated_at']) ? $usefulAttributes['updated_at'] : '';
+            $p['internal_update_time'] = isset($usefulAttributes['updated_at']) ? date("c", strtotime($usefulAttributes['updated_at'])) : '';
 
             $p['image_url'] = $imageUrl;
             if (file_exists($imageLocalPath))
