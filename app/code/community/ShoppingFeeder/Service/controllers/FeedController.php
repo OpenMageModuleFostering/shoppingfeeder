@@ -56,7 +56,10 @@ class ShoppingFeeder_Service_FeedController extends ShoppingFeeder_Service_Contr
                 'page' => $page,
                 'num_per_page' => $numPerPage,
                 'offers' => $offers,
-                'store' => $store
+                'store' => $store,
+                'base_currency' => $baseCurrency,
+                'price_currency' => $priceCurrency,
+                'exchange_Rate' => $priceCurrencyRate
             )
         );
 
