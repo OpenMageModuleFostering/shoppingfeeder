@@ -5,7 +5,7 @@ require_once(Mage::getModuleDir('Controller','ShoppingFeeder_Service').DS.'Contr
 
 class ShoppingFeeder_Service_VersionController extends Mage_Core_Controller_Front_Action
 {
-    protected static $_version = '1.5.0';
+    protected static $_version = '1.5.1';
 
     public function indexAction()
     {

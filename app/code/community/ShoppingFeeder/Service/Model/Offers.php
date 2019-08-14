@@ -252,6 +252,7 @@ class ShoppingFeeder_Service_Model_Offers extends Mage_Core_Model_Abstract
             $title = $data['name'] . ' - ' . $variantOptionsTitle;
             $sku = $variant->getData('sku');
             $price = $variantPrice;
+            $salePrice = $variant->getSpecialPrice();
             $variantImage = $variant->getImage();
 
             if (!is_null($variantImage) && !empty($variantImage) && $variantImage!='no_selection')
@@ -293,6 +294,9 @@ class ShoppingFeeder_Service_Model_Offers extends Mage_Core_Model_Abstract
             {
                 $price = $product->getPrice();
             }
+
+            $salePrice = $product->getSpecialPrice();
+
             $imageFile = $product->getImage();
 //            $imageUrl = $p['image_url'] = Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA).
 //                'catalog/product/'.preg_replace('/^\//', '', $imageFile);
@@ -327,7 +331,7 @@ class ShoppingFeeder_Service_Model_Offers extends Mage_Core_Model_Abstract
 
             //do a currency conversion. if the currency is in base currency, it will be 1.0
             $price = $price * $priceCurrencyRate;
-            $salePrice = $product->getSpecialPrice() * $priceCurrencyRate;
+            $salePrice = $salePrice * $priceCurrencyRate;
 
             $p['currency'] = $priceCurrency;
             $p['price'] = $price;// Mage::helper('checkout')->convertPrice($priceModel->getPrice($product), false);
