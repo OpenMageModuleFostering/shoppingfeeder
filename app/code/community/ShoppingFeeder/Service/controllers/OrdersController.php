@@ -15,14 +15,28 @@ class ShoppingFeeder_Service_OrdersController extends ShoppingFeeder_Service_Con
         $page = $this->getRequest()->getParam('page', null);
         $numPerPage = $this->getRequest()->getParam('num_per_page', 1000);
         $orderId = $this->getRequest()->getParam('order_id', null);
+        $store = $this->getRequest()->getParam('store', null);
 
-        if (is_null($orderId))
+        /**
+         * For per-store system
+         */
+        if (!is_null($store))
         {
-            $orders = $ordersModel->getItems($page, $numPerPage);
+            Mage::app()->setCurrentStore($store);
         }
         else
         {
-            $orders = $ordersModel->getItem($orderId);
+            $mageApp = Mage::app();
+            $mageApp->setCurrentStore($mageApp::DISTRO_STORE_CODE);
+        }
+
+        if (is_null($orderId))
+        {
+            $orders = $ordersModel->getItems($page, $numPerPage, $store);
+        }
+        else
+        {
+            $orders = $ordersModel->getItem($orderId, $store);
         }
 
         $responseData = array(
@@ -30,7 +44,8 @@ class ShoppingFeeder_Service_OrdersController extends ShoppingFeeder_Service_Con
             'data' => array(
                 'page' => $page,
                 'num_per_page' => $numPerPage,
-                'orders' => $orders
+                'orders' => $orders,
+                'store' => $store
             )
         );
 

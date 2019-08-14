@@ -16,14 +16,28 @@ class ShoppingFeeder_Service_FeedController extends ShoppingFeeder_Service_Contr
         $numPerPage = $this->getRequest()->getParam('num_per_page', 1000);
         $offerId = $this->getRequest()->getParam('offer_id', null);
         $lastUpdate = $this->getRequest()->getParam('last_update', null);
+        $store = $this->getRequest()->getParam('store', null);
 
-        if (is_null($offerId))
+        /**
+         * For per-store system
+         */
+        if (!is_null($store))
         {
-            $offers = $offersModel->getItems($page, $numPerPage, $lastUpdate);
+            Mage::app()->setCurrentStore($store);
         }
         else
         {
-            $offers = $offersModel->getItem($offerId);
+            $mageApp = Mage::app();
+            $mageApp->setCurrentStore($mageApp::DISTRO_STORE_CODE);
+        }
+
+        if (is_null($offerId))
+        {
+            $offers = $offersModel->getItems($page, $numPerPage, $lastUpdate, $store);
+        }
+        else
+        {
+            $offers = $offersModel->getItem($offerId, $store);
         }
 
         $responseData = array(
@@ -31,7 +45,8 @@ class ShoppingFeeder_Service_FeedController extends ShoppingFeeder_Service_Contr
             'data' => array(
                 'page' => $page,
                 'num_per_page' => $numPerPage,
-                'offers' => $offers
+                'offers' => $offers,
+                'store' => $store
             )
         );
 

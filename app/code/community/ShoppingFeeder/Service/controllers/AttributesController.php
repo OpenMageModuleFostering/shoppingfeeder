@@ -9,6 +9,21 @@ class ShoppingFeeder_Service_AttributesController extends ShoppingFeeder_Service
     {
         set_time_limit(0);
 
+        $store = $this->getRequest()->getParam('store', null);
+
+        /**
+         * For per-store system
+         */
+        if (!is_null($store))
+        {
+            Mage::app()->setCurrentStore($store);
+        }
+        else
+        {
+            $mageApp = Mage::app();
+            $mageApp->setCurrentStore($mageApp::DISTRO_STORE_CODE);
+        }
+
         $internalAttributes = Mage::getResourceModel('catalog/product_attribute_collection')
             ->getItems();
 
@@ -20,7 +35,8 @@ class ShoppingFeeder_Service_AttributesController extends ShoppingFeeder_Service
         $responseData = array(
             'status' => 'success',
             'data' => array(
-                'attributes' => $attributes
+                'attributes' => $attributes,
+                'store' => $store
             )
         );
 

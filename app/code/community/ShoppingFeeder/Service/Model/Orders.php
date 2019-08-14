@@ -35,12 +35,20 @@ class ShoppingFeeder_Service_Model_Orders extends Mage_Core_Model_Abstract
         return $data;
     }
 
-    public function getItems($page = null, $numPerPage = 1000)
+    public function getItems($page = null, $numPerPage = 1000, $store = null)
     {
         /* @var Mage_Catalog_Model_Resource_Eav_Mysql4_Product_Collection $collection */
         $collection = Mage::getModel('sales/order')->getCollection()
             ->addAttributeToSelect('*')
             ->addAttributeToFilter('status', Mage_Sales_Model_Order::STATE_COMPLETE);
+
+        /**
+         * For per-store system
+         */
+        if (!is_null($store))
+        {
+            $collection->addAttributeToFilter('store_id', Mage::app()->getStore($store)->getId());
+        }
 
         if (!is_null($page))
         {
@@ -63,7 +71,7 @@ class ShoppingFeeder_Service_Model_Orders extends Mage_Core_Model_Abstract
         return $orders;
     }
 
-    public function getItem($itemId)
+    public function getItem($itemId, $store = null)
     {
         $orders = array();
 

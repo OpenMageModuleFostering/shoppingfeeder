@@ -111,6 +111,9 @@ class ShoppingFeeder_Service_Model_Offers extends Mage_Core_Model_Abstract
         $maxDepth = 0;
         $categoryPathToUse = '';
 
+        $storeRootCategoryId = Mage::app()->getStore()->getRootCategoryId();
+        $storeRootCategoryName = Mage::getModel('catalog/category')->load($storeRootCategoryId)->getName();
+
         if (!empty($categories))
         {
             //we will get all the category paths and then use the most refined, deepest one
@@ -132,7 +135,7 @@ class ShoppingFeeder_Service_Model_Offers extends Mage_Core_Model_Abstract
                     $depth++;
                     $category = Mage::getModel('catalog/category')->load($categoryId);
                     $category_name = $category->getName();
-                    if ($category_name != 'Root Catalog' && $category_name != 'Default Category')
+                    if ($category_name != $storeRootCategoryName)
                     {
                         if (!empty($categoryPath))
                         {
@@ -182,7 +185,8 @@ class ShoppingFeeder_Service_Model_Offers extends Mage_Core_Model_Abstract
             $sku = $variant->getData('sku');
             $price = $variantPrice;
             $variantImage = $variant->getImage();
-            if (!is_null($variantImage) && !empty($variantImage))
+
+            if (!is_null($variantImage) && !empty($variantImage) && $variantImage!='no_selection')
             {
                 $imageFile = $variant->getImage();
                 $imageUrl = $p['image_url'] = Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA).
@@ -197,10 +201,6 @@ class ShoppingFeeder_Service_Model_Offers extends Mage_Core_Model_Abstract
                 $imageLocalPath = $product->getMediaConfig()->getMediaPath($imageFile);
             }
             $productUrl = $product->getProductUrl().'#'.implode('&', $urlHashParts);
-
-//            var_dump($variantOptionsTitle);
-//            var_dump($variantPrice);
-//            exit();
         }
         else
         {
@@ -283,7 +283,7 @@ class ShoppingFeeder_Service_Model_Offers extends Mage_Core_Model_Abstract
         return $p;
     }
 
-    public function getItems($page = null, $numPerPage = 1000, $lastUpdate = null)
+    public function getItems($page = null, $numPerPage = 1000, $lastUpdate = null, $store = null)
     {
         /* @var Mage_Catalog_Model_Resource_Eav_Mysql4_Product_Collection $collection */
         $collection = Mage::getModel('catalog/product')->getCollection()
@@ -294,10 +294,10 @@ class ShoppingFeeder_Service_Model_Offers extends Mage_Core_Model_Abstract
         /**
          * For per-store system
          */
-        /*
-        $store='default';
-        $collection->addStoreFilter(Mage::app()->getStore($store)->getId());
-        */
+        if (!is_null($store))
+        {
+            $collection->addStoreFilter(Mage::app()->getStore($store)->getId());
+        }
 
         if (!is_null($page))
         {
@@ -388,7 +388,7 @@ class ShoppingFeeder_Service_Model_Offers extends Mage_Core_Model_Abstract
         return $products;
     }
 
-    public function getItem($itemId)
+    public function getItem($itemId, $store = null)
     {
         $products = array();
 
