@@ -132,6 +132,7 @@ class ShoppingFeeder_Service_Model_Offers extends Mage_Core_Model_Abstract
         $storeRootCategoryId = Mage::app()->getStore()->getRootCategoryId();
         $storeRootCategoryName = Mage::getModel('catalog/category')->load($storeRootCategoryId)->getName();
 
+        $lastCatUrl = null;
         if (!empty($categories))
         {
             /** @var Mage_Catalog_Model_Resource_Category_Collection $categoryCollection */
@@ -146,7 +147,8 @@ class ShoppingFeeder_Service_Model_Offers extends Mage_Core_Model_Abstract
                     ->setStoreId(Mage::app()->getStore()->getId())
                     ->addAttributeToSelect('name')
                     ->addAttributeToSelect('is_active')
-                    ->addFieldToFilter('entity_id', array('in' => $pathIds));
+                    ->addFieldToFilter('entity_id', array('in' => $pathIds))
+                    ->addUrlRewriteToResult();
 
                 $pathByName = array();
                 /** @var Mage_Catalog_Model_Category $cat */
@@ -154,6 +156,14 @@ class ShoppingFeeder_Service_Model_Offers extends Mage_Core_Model_Abstract
                     if ($cat->getName() != $storeRootCategoryName)
                     {
                         $pathByName[] = $cat->getName();
+
+                        //try get the category URL
+                        try {
+                            $lastCatUrl = $cat->getUrl();
+                        }
+                        catch (Exception $e) {
+
+                        }
                     }
                 }
 
@@ -279,6 +289,7 @@ class ShoppingFeeder_Service_Model_Offers extends Mage_Core_Model_Abstract
         else
         {
             $p['category'] = $categoryPathToUse;
+            $p['category_url'] = $lastCatUrl;
             $p['title'] = $title;
             $p['brand'] = ($brand=='No') ? (($manufacturer == 'No') ? '' : $manufacturer) : $brand;
             $p['manufacturer'] = ($manufacturer=='No') ? $brand : $manufacturer;
